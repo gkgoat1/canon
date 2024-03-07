@@ -1,11 +1,13 @@
-package at.gkgo.canon.api.identity.typed;
+package at.gkgo.canon.api.identity;
 
-import at.gkgo.canon.api.identity.Identity;
+import at.gkgo.canon.api.component.ComponentBehavior;
+import at.gkgo.canon.api.component.Patch;
+import at.gkgo.canon.api.component.Query;
+import at.gkgo.canon.api.identity.component.*;
 import at.gkgo.canon.api.util.TypeUtils;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.endec.BuiltInEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
@@ -36,23 +38,23 @@ public class Bake {
         }
     }
 
-    public <T> T get(TypedIdentity<T> key) {
+    public <T> T get(IdentityComponent<T> key) {
         return (T) all.get(key.name);
     }
 
-    public <T> void put(TypedIdentity<T> key, T object) {
+    public <T> void put(IdentityComponent<T> key, T object) {
         all.put(key.name, object);
     }
 
-    public <T> void remove(TypedIdentity<T> key){
+    public <T> void remove(IdentityComponent<T> key){
         all.remove(key.name);
     }
-    public static TypedIdentityData<Bake> DATA = new TypedIdentityData<>(Bake.BAKE, new TypedIdentityHandler<Bake>() {
+    public static IdentityComponentData<Bake> DATA = new IdentityComponentData<>(Bake.BAKE, new ComponentBehavior<Bake>() {
         @Override
         public <Q, C> Optional<Q> query(Bake value, Query<Q, C> query, C ctx) {
             for (var i : value.all.entrySet()) {
-                if(TypedIdentity.ALL.containsKey(i.getKey())) {
-                    var h = TypedIdentity.ALL.get(i.getKey());
+                if(IdentityComponent.ALL.containsKey(i.getKey())) {
+                    var h = IdentityComponent.ALL.get(i.getKey());
                     var r = h.data.handler.query(TypeUtils.unsafeCoerce(i.getValue()), query, ctx);
                     if (r.isPresent()) {
                         return r;
@@ -66,12 +68,27 @@ public class Bake {
         public <C> Bake patch(Bake value, Patch<C> patch, C ctx) {
             return new Bake(Util.make(new HashMap<>(), (m) -> {
                 for (var i : value.all.entrySet()) {
-                    if(TypedIdentity.ALL.containsKey(i.getKey())) {
-                        var h = TypedIdentity.ALL.get(i.getKey());
+                    if(IdentityComponent.ALL.containsKey(i.getKey())) {
+                        var h = IdentityComponent.ALL.get(i.getKey());
                         var r = h.data.handler.patch(TypeUtils.unsafeCoerce(i.getValue()), patch, ctx);
                         m.put(i.getKey(), r);
                     }else{
                         m.put(i.getKey(),i.getValue());
+                    }
+                }
+            }));
+        }
+
+        @Override
+        public Bake copy(Bake value) {
+            return new Bake(Util.make(new HashMap<>(), (m) -> {
+                for (var i : value.all.entrySet()) {
+                    if(IdentityComponent.ALL.containsKey(i.getKey())) {
+                        var h = IdentityComponent.ALL.get(i.getKey());
+                        var r = h.data.handler.copy(TypeUtils.unsafeCoerce(i.getValue()));
+                        m.put(i.getKey(), r);
+                    }else{
+                        m.put(i.getKey(),((NbtElement)i.getValue()).copy());
                     }
                 }
             }));
@@ -82,10 +99,10 @@ public class Bake {
         public void encode(Serializer<?> serializer, Bake value) {
             try (var s = serializer.struct()) {
                 for (var a : Identity.KEYS) {
-                    if(TypedIdentity.ALL.containsKey(a)) {
+                    if(IdentityComponent.ALL.containsKey(a)) {
                         var g = value.all.get(a);
 //                        if (g == null) continue;
-                        s.field(a, TypedIdentity.ALL.get(a).data.endec.optionalOf(), TypeUtils.unsafeCoerce(Optional.ofNullable(g)));
+                        s.field(a, IdentityComponent.ALL.get(a).data.endec.optionalOf(), TypeUtils.unsafeCoerce(Optional.ofNullable(g)));
                     }else{
                         var g = value.all.get(a);
 //                        if (g == null) continue;
@@ -100,8 +117,8 @@ public class Bake {
             var m = new HashMap<String, Object>();
             var s = deserializer.struct();
             for (var a : Identity.KEYS) {
-                if(TypedIdentity.ALL.containsKey(a)) {
-                    var p = s.field(a, TypedIdentity.ALL.get(a).data.endec.optionalOf(), Optional.empty());
+                if(IdentityComponent.ALL.containsKey(a)) {
+                    var p = s.field(a, IdentityComponent.ALL.get(a).data.endec.optionalOf(), Optional.empty());
                     if (p.isEmpty()) continue;
                     m.put(a, p.get());
                 }else{

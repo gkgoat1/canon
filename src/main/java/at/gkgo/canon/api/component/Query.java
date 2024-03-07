@@ -1,4 +1,4 @@
-package at.gkgo.canon.api.identity.typed;
+package at.gkgo.canon.api.component;
 
 import net.minecraft.util.Identifier;
 

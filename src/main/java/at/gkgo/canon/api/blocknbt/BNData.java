@@ -1,16 +1,15 @@
 package at.gkgo.canon.api.blocknbt;
 
-import at.gkgo.canon.api.identity.typed.Bake;
+import at.gkgo.canon.api.component.ComponentBehavior;
+import at.gkgo.canon.api.component.Patch;
+import at.gkgo.canon.api.component.Query;
 import at.gkgo.canon.api.util.TypeUtils;
 import io.wispforest.owo.serialization.Deserializer;
 import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.serialization.Serializer;
-import io.wispforest.owo.serialization.endec.StructEndecBuilder;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -19,6 +18,44 @@ import java.util.Optional;
 
 public class BNData {
 //    public final Bake normal;
+    public static ComponentBehavior<BNData> BEHAVIOR = new ComponentBehavior<BNData>() {
+    @Override
+    public <Q, C> Optional<Q> query(BNData value, Query<Q, C> query, C ctx) {
+        for(var i: BlockComponent.ALL.entrySet()){
+            if(value.components.containsKey(i.getKey())){
+                var c = i.getValue().data.behavior.query(TypeUtils.unsafeCoerce(value.components.get(i.getKey())),query,ctx);
+                if(c.isPresent()){
+                    return c;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public <C> BNData patch(BNData value, Patch<C> patch, C ctx) {
+        var m = new HashMap<String,Object>();
+        for(var i: BlockComponent.ALL.entrySet()){
+            if(value.components.containsKey(i.getKey())){
+                var c = i.getValue().data.behavior.patch(TypeUtils.unsafeCoerce(value.components.get(i.getKey())),patch,ctx);
+                m.put(i.getKey(),c);
+            }
+        }
+        return new BNData(m);
+    }
+
+    @Override
+    public BNData copy(BNData value) {
+        var m = new HashMap<String,Object>();
+        for(var i: BlockComponent.ALL.entrySet()){
+            if(value.components.containsKey(i.getKey())){
+                var c = i.getValue().data.behavior.copy(TypeUtils.unsafeCoerce(value.components.get(i.getKey())));
+                m.put(i.getKey(),c);
+            }
+        }
+        return new BNData(m);
+    }
+};
     private final Map<String,Object> components;
 
     public BNData(Map<String,Object> components) {

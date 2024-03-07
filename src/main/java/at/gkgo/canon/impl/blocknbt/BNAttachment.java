@@ -1,21 +1,14 @@
 package at.gkgo.canon.impl.blocknbt;
 
 import at.gkgo.canon.api.blocknbt.BNData;
-import at.gkgo.canon.api.codec.CodecUtils;
-import at.gkgo.canon.api.identity.typed.Bake;
 import at.gkgo.canon.api.palette2.ChunkBlockPosPalette;
 import com.mojang.serialization.Codec;
 import io.wispforest.owo.serialization.Endec;
-import io.wispforest.owo.serialization.format.nbt.NbtEndec;
-import it.unimi.dsi.fastutil.ints.Int2IntRBTreeMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.Int2ObjectBiMap;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class BNAttachment {

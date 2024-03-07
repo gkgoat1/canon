@@ -1,8 +1,8 @@
 package at.gkgo.canon.api.blocknbt;
 
+import at.gkgo.canon.api.component.ComponentBehavior;
 import at.gkgo.canon.api.identity.Identity;
-import at.gkgo.canon.api.identity.typed.Bake;
-import at.gkgo.canon.api.identity.typed.TypedIdentityData;
+import at.gkgo.canon.api.identity.Bake;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.minecraft.nbt.NbtCompound;
 
@@ -27,6 +27,6 @@ public class BlockComponent<T> {
     public static void init(){
 
     }
-    public static BlockComponent<Bake> IDENTITY = new BlockComponent<Bake>(new BlockComponentData<Bake>(Bake.BAKE),"canon:identity").register();
-    public static BlockComponent<NbtCompound> CUSTOM_DATA = new BlockComponent<>(new BlockComponentData<>(NbtEndec.COMPOUND),"minecraft:custom_data").register();
+    public static BlockComponent<Bake> IDENTITY = new BlockComponent<Bake>(new BlockComponentData<Bake>(Bake.BAKE,Bake.DATA.handler),"canon:identity").register();
+    public static BlockComponent<NbtCompound> CUSTOM_DATA = new BlockComponent<>(new BlockComponentData<>(NbtEndec.COMPOUND, ComponentBehavior.empty((a) -> a.copy())),"minecraft:custom_data").register();
 }
